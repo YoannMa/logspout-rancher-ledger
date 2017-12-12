@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/fsouza/go-dockerclient"
 	"github.com/gliderlabs/logspout/router"
-	"github.com/rancherio/go-rancher/v3"
+	"github.com/rancherio/go-rancher/v2"
 	"log"
 	"net"
 	"os"
@@ -204,11 +204,7 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			StackState: stackData.State,
 		}
 
-		// Since Rancher 2.0 an environemt is a k8s namespace so we pull the namespace label to set
-		// the environment
-		environment := rcontainer.Labels["io.kubernetes.pod.namespace"]
 		rancherInfo := &RancherInfo{
-			Environment: environment,
 			Container:   container,
 			Stack:       stack,
 		}
