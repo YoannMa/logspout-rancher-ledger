@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"fmt"
 )
 
 // Setting package global Rancher API setting
@@ -191,8 +192,8 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 
 		// Fill out container data
 		container := &RancherContainer{
-			Name:     rcontainer.Labels["io.rancher.container.name"].(string),
-			IP:       rcontainer.Labels["io.rancher.container.ip"].(string),
+			Name:     fmt.Sprintf("%v",rcontainer.Labels["io.rancher.container.name"]),
+			IP:       fmt.Sprintf("%v",rcontainer.Labels["io.rancher.container.ip"]),
 			ID:       rcontainer.Id,
 			HostID:   rcontainer.HostId,
 			DockerID: c.ID,
