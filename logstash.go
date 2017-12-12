@@ -18,7 +18,6 @@ var cattleUrl = os.Getenv("CATTLE_URL")
 var cattleAccessKkey = os.Getenv("CATTLE_ACCESS_KEY")
 var cattleSecretKey = os.Getenv("CATTLE_SECRET_KEY")
 
-
 var rancher *client.RancherClient
 var cCache map[string]*RancherInfo
 
@@ -26,7 +25,6 @@ func init() {
 	router.AdapterFactories.Register(NewLogstashAdapter, "logstash")
 	rancher = initRancherClient()
 	cCache = make(map[string]*RancherInfo)
-
 }
 
 // LogstashAdapter is an adapter that streams UDP JSON to Logstash.
@@ -150,7 +148,6 @@ func DeleteFromCache(cId string) bool {
 	delete(cCache, cId)
 
 	return ExistsInCache(cId)
-
 }
 
 // Get the rancher meteadata from the api/cahce
@@ -179,16 +176,16 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			return nil
 		}
 
-		service, err := rancher.Service.ById(rcontainer.ServiceId)
-		if err != nil {
-			log.Print(err)
-		}
-
-		stackData, err := rancher.Stack.ById(rcontainer.StackId)
-
-		if err != nil {
-			log.Print(err)
-		}
+		//service, err := rancher.Service.ById(rcontainer.ServiceId)
+		//if err != nil {
+		//	log.Print(err)
+		//}
+		//
+		//stackData, err := rancher.Stack.ById(rcontainer.StackId)
+		//
+		//if err != nil {
+		//	log.Print(err)
+		//}
 
 		// Fill out container data
 		container := &RancherContainer{
@@ -200,9 +197,9 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 		}
 
 		stack := &RancherStack{
-			Service:    service.Name,
-			StackName:  stackData.Name,
-			StackState: stackData.State,
+			Service:    "", //service.Name,
+			StackName:  "", //stackData.Name,
+			StackState: "", //stackData.State,
 		}
 
 		rancherInfo := &RancherInfo{
