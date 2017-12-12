@@ -191,8 +191,8 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 
 		// Fill out container data
 		container := &RancherContainer{
-			Name:     rcontainer.Labels["io.rancher.container.name"],
-			IP:       rcontainer.Labels["io.rancher.container.ip"],
+			Name:     rcontainer.Labels["io.rancher.container.name"].(string),
+			IP:       rcontainer.Labels["io.rancher.container.ip"].(string),
 			ID:       rcontainer.Id,
 			HostID:   rcontainer.HostId,
 			DockerID: c.ID,
