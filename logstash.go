@@ -291,7 +291,6 @@ type DockerInfo struct {
 
 // Rancher data for evetn data
 type RancherInfo struct {
-	Environment string            `json:"environment,omitempty"`
 	Container   *RancherContainer `json:"container,omitempty"`
 	Stack       *RancherStack     `json:"stack,omitempty"`
 }
