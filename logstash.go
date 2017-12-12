@@ -176,16 +176,6 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			return nil
 		}
 
-		service, err := rancher.Service.ById(rcontainer.ServiceId)
-		if err != nil {
-			log.Print(err)
-		}
-
-		//stackData, err := rancher.Stack.ById(rcontainer.StackId)
-		//
-		//if err != nil {
-		//	log.Print(err)
-		//}
 
 		// Fill out container data
 		container := &RancherContainer{
@@ -194,6 +184,19 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			ID:       rcontainer.Id,
 			HostID:   rcontainer.HostId,
 			DockerID: c.ID,
+		}
+
+		service, err := rancher.Service.ById(rcontainer.ServiceId)
+		if err != nil {
+			log.Print(err)
+		}
+
+		fmt.Printf("The StackId type is: %T \n", rcontainer.StackId)
+		fmt.Printf("The StackId value is: %#v \n", rcontainer.StackId)
+
+		//stackData, err := rancher.Stack.ById(rcontainer.StackId)
+		if err != nil {
+			log.Print(err)
 		}
 
 		stack := &RancherStack{
