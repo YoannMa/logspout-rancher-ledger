@@ -183,6 +183,7 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			HostID:   rcontainer.HostId,
 			DockerID: c.ID,
 			Labels:   rcontainer.Labels,
+			DebugContainer: rcontainer,
 		}
 
 		stack := &RancherStack{
@@ -199,6 +200,7 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 				log.Print(err)
 			} else {
 				stack.Service = service.Name
+				stack.DebugService = service
 			}
 		}
 
@@ -209,6 +211,7 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			} else {
 				stack.StackName = stackData.Name
 				stack.StackState = stackData.State
+				stack.DebugStack = stackData
 			}
 		}
 
@@ -304,19 +307,22 @@ type RancherInfo struct {
 
 // Rancher container data for event
 type RancherContainer struct {
-	Name     string                 `json:"name"`           // io.rancher.container.name
-	IP       string                 `json:"ip,omitempty"`   // io.rancher.container.ip
-	ID       string                 `json:"once,omitempty"` // io.rancher.container.start_once
-	HostID   string                 `json:"hostId,omitempty"`
-	DockerID string                 `json:"dockerId,omitempty"`
-	Labels   map[string]interface{} `json:"labels,omitempty"`
+	Name           string                 `json:"name"`
+	IP             string                 `json:"ip,omitempty"`
+	ID             string                 `json:"rancherId,omitempty"`
+	HostID         string                 `json:"hostId,omitempty"`
+	DockerID       string                 `json:"dockerId,omitempty"`
+	Labels         map[string]interface{} `json:"labels,omitempty"`
+	DebugContainer *client.Container      `json:"debugContainer,omitempty"`
 }
 
 // Rancher stack inf for event
 type RancherStack struct {
-	Service    string `json:"service,omitempty"` // Service Name from API
-	ServiceId  string `json:"ServiceId,omitempty"`
-	StackId    string `json:"StackId,omitempty"`
-	StackName  string `json:"stackName,omitempty"` // io.rancher.stack.name
-	StackState string `json:"stackState,omitempty"`
+	Service      string          `json:"service,omitempty"`
+	ServiceId    string          `json:"ServiceId,omitempty"`
+	StackId      string          `json:"StackId,omitempty"`
+	StackName    string          `json:"stackName,omitempty"`
+	StackState   string          `json:"stackState,omitempty"`
+	DebugStack   *client.Stack   `json:"debugStack,omitempty"`
+	DebugService *client.Service `json:"debugService,omitempty"`
 }
