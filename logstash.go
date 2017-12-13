@@ -10,7 +10,6 @@ import (
 	"net"
 	"os"
 	"strings"
-	"fmt"
 )
 
 // Setting package global Rancher API setting
@@ -176,20 +175,22 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			return nil
 		}
 
-
 		// Fill out container data
 		container := &RancherContainer{
-			Name:     fmt.Sprintf("%v",rcontainer.Labels["io.rancher.container.name"]),
-			IP:       fmt.Sprintf("%v",rcontainer.Labels["io.rancher.container.ip"]),
+			Name:     rcontainer.Name,
+			IP:       rcontainer.Ip,
 			ID:       rcontainer.Id,
 			HostID:   rcontainer.HostId,
 			DockerID: c.ID,
+			Labels:   rcontainer.Labels,
 		}
 
 		stack := &RancherStack{
-			Service:    "unknown",
-			StackName:  "unknown",
-			StackState: "unknown",
+			Service:    "",
+			StackName:  "",
+			StackState: "",
+			StackId:    rcontainer.StackId,
+			ServiceId:  rcontainer.ServiceId,
 		}
 
 		if rcontainer.ServiceId != "" {
@@ -212,8 +213,8 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 		}
 
 		rancherInfo := &RancherInfo{
-			Container:   container,
-			Stack:       stack,
+			Container: container,
+			Stack:     stack,
 		}
 
 		Cache(rancherInfo)
@@ -297,22 +298,25 @@ type DockerInfo struct {
 
 // Rancher data for evetn data
 type RancherInfo struct {
-	Container   *RancherContainer `json:"container,omitempty"`
-	Stack       *RancherStack     `json:"stack,omitempty"`
+	Container *RancherContainer `json:"container,omitempty"`
+	Stack     *RancherStack     `json:"stack,omitempty"`
 }
 
 // Rancher container data for event
 type RancherContainer struct {
-	Name     string `json:"name"`           // io.rancher.container.name
-	IP       string `json:"ip,omitempty"`   // io.rancher.container.ip
-	ID       string `json:"once,omitempty"` // io.rancher.container.start_once
-	HostID   string `json:"hostId,omitempty"`
-	DockerID string `json:"dockerId,omitempty"`
+	Name     string                 `json:"name"`           // io.rancher.container.name
+	IP       string                 `json:"ip,omitempty"`   // io.rancher.container.ip
+	ID       string                 `json:"once,omitempty"` // io.rancher.container.start_once
+	HostID   string                 `json:"hostId,omitempty"`
+	DockerID string                 `json:"dockerId,omitempty"`
+	Labels   map[string]interface{} `json:"labels,omitempty"`
 }
 
 // Rancher stack inf for event
 type RancherStack struct {
-	Service    string `json:"service,omitempty"`   // Service Name from API
+	Service    string `json:"service,omitempty"` // Service Name from API
+	ServiceId  string `json:"ServiceId,omitempty"`
+	StackId    string `json:"StackId,omitempty"`
 	StackName  string `json:"stackName,omitempty"` // io.rancher.stack.name
 	StackState string `json:"stackState,omitempty"`
 }
