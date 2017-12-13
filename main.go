@@ -7,6 +7,7 @@ import (
 
 func init() {
 	router.AdapterFactories.Register(NewHTTPAdapter, "http")
+	router.AdapterFactories.Register(NewHTTPAdapter, "https")
 }
 
 // Stream implements the router.LogAdapter interface

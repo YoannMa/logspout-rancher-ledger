@@ -17,6 +17,7 @@ var cCache map[string]*RancherInfo
 
 func init() {
 	rancher = initRancherClient()
+	cCache = make(map[string]*RancherInfo)
 }
 
 func initRancherClient() *client.RancherClient {

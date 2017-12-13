@@ -22,11 +22,6 @@ import (
 	"github.com/fsouza/go-dockerclient"
 )
 
-func init() {
-	router.AdapterFactories.Register(NewHTTPAdapter, "http")
-	router.AdapterFactories.Register(NewHTTPAdapter, "https")
-}
-
 func debug(v ...interface{}) {
 	if os.Getenv("DEBUG") != "" {
 		log.Println(v...)
