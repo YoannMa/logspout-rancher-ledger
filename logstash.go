@@ -183,41 +183,10 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 			HostID:   rcontainer.HostId,
 			DockerID: c.ID,
 			Labels:   rcontainer.Labels,
-			DebugContainer: rcontainer,
-		}
-
-		stack := &RancherStack{
-			Service:    "",
-			StackName:  "",
-			StackState: "",
-			StackId:    rcontainer.StackId,
-			ServiceId:  rcontainer.ServiceId,
-		}
-
-		if rcontainer.ServiceId != "" {
-			service, err := rancher.Service.ById(rcontainer.ServiceId)
-			if err != nil {
-				log.Print(err)
-			} else {
-				stack.Service = service.Name
-				stack.DebugService = service
-			}
-		}
-
-		if rcontainer.StackId != "" {
-			stackData, err := rancher.Stack.ById(rcontainer.StackId)
-			if err != nil {
-				log.Print(err)
-			} else {
-				stack.StackName = stackData.Name
-				stack.StackState = stackData.State
-				stack.DebugStack = stackData
-			}
 		}
 
 		rancherInfo := &RancherInfo{
 			Container: container,
-			Stack:     stack,
 		}
 
 		Cache(rancherInfo)
@@ -302,7 +271,7 @@ type DockerInfo struct {
 // Rancher data for evetn data
 type RancherInfo struct {
 	Container *RancherContainer `json:"container,omitempty"`
-	Stack     *RancherStack     `json:"stack,omitempty"`
+	//Stack     *RancherStack     `json:"stack,omitempty"`
 }
 
 // Rancher container data for event
@@ -313,16 +282,15 @@ type RancherContainer struct {
 	HostID         string                 `json:"hostId,omitempty"`
 	DockerID       string                 `json:"dockerId,omitempty"`
 	Labels         map[string]interface{} `json:"labels,omitempty"`
-	DebugContainer *client.Container      `json:"debugContainer,omitempty"`
 }
 
 // Rancher stack inf for event
-type RancherStack struct {
-	Service      string          `json:"service,omitempty"`
-	ServiceId    string          `json:"ServiceId,omitempty"`
-	StackId      string          `json:"StackId,omitempty"`
-	StackName    string          `json:"stackName,omitempty"`
-	StackState   string          `json:"stackState,omitempty"`
-	DebugStack   *client.Stack   `json:"debugStack,omitempty"`
-	DebugService *client.Service `json:"debugService,omitempty"`
-}
+//type RancherStack struct {
+//	Service      string          `json:"service,omitempty"`
+//	ServiceId    string          `json:"ServiceId,omitempty"`
+//	StackId      string          `json:"StackId,omitempty"`
+//	StackName    string          `json:"stackName,omitempty"`
+//	StackState   string          `json:"stackState,omitempty"`
+//	DebugStack   *client.Stack   `json:"debugStack,omitempty"`
+//	DebugService *client.Service `json:"debugService,omitempty"`
+//}
