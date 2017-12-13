@@ -235,14 +235,6 @@ func (a *LogstashAdapter) Stream(logstream chan *router.Message) {
 		data["docker"] = dockerInfo
 		data["rancher"] = rancherInfo
 
-		// Set the index field for use with the logstash.conf
-		// elasticsearch hosts field has "%{index}-%{+YYYY.MM.dd}"
-		if rancherInfo.Stack.StackName != "" {
-			data["index"] = rancherInfo.Stack.StackName
-		} else {
-			data["index"] = rancherInfo.Container.Name
-		}
-
 		// Return the JSON encoding
 		if js, err = json.Marshal(data); err != nil {
 			// Log error message and continue parsing next line, if marshalling fails
