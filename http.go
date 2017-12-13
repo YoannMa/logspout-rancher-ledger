@@ -207,24 +207,15 @@ func (a *HTTPAdapter) flushHttp(reason string) {
 	a.bufferMutex.Unlock()
 
 	// Create JSON representation of all messages
-	messages := make([]string, 0, len(buffer))
-	for i := range buffer {
-		m := buffer[i]
-		message, err := json.Marshal(m)
-		if err != nil {
-			debug("flushHttp - Error encoding JSON: ", err)
-			continue
-		}
-		messages = append(messages, string(message))
+	payload, err := json.Marshal(buffer)
+	if err != nil {
+		debug("flushHttp - Error encoding JSON: ", err)
+		return
 	}
 
-	// Glue all the JSON representations together into one payload to send
-	payload := strings.Join(messages, "\n")
-
 	go func() {
-
 		// Create the request and send it on its way
-		request := createRequest(a.url, a.useGzip, payload)
+		request := createRequest(a.url, a.useGzip, string(payload))
 		start := time.Now()
 		response, err := a.client.Do(request)
 		if err != nil {
@@ -251,8 +242,8 @@ func (a *HTTPAdapter) flushHttp(reason string) {
 
 		// Bookkeeping, logging
 		timeAll := time.Since(start)
-		a.totalMessageCount += len(messages)
-		debug("http: flushed:", reason, "messages:", len(messages),
+		a.totalMessageCount += len(buffer)
+		debug("http: flushed:", reason, "messages:", len(buffer),
 			"in:", timeAll, "total:", a.totalMessageCount)
 	}()
 }
