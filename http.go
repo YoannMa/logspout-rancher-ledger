@@ -87,10 +87,10 @@ func dial(netw, addr string) (net.Conn, error) {
 
 // HTTPAdapter is an adapter that POSTs logs to an HTTP endpoint
 type HTTPAdapter struct {
-	route             *router.Route
-	url               string
-	client            *http.Client
-	buffer            []*map[string]interface{}
+	route  *router.Route
+	url    string
+	client *http.Client
+	buffer []*map[string]interface{}
 	timer             *time.Timer
 	capacity          int
 	timeout           time.Duration
@@ -169,15 +169,16 @@ func NewHTTPAdapter(route *router.Route) (router.LogAdapter, error) {
 
 	// Make the HTTP adapter
 	return &HTTPAdapter{
-		route:    route,
-		url:      endpointUrl,
-		client:   client,
-		buffer:   buffer,
-		timer:    timer,
-		capacity: capacity,
-		timeout:  timeout,
-		useGzip:  useGzip,
-		crash:    crash,
+		route:          route,
+		url:            endpointUrl,
+		client:         client,
+		buffer:         buffer,
+		timer:          timer,
+		capacity:       capacity,
+		timeout:        timeout,
+		useGzip:        useGzip,
+		crash:          crash,
+		logstashFields: make(map[string]map[string]string),
 	}, nil
 }
 
