@@ -1,15 +1,10 @@
-package logstash
+package logspoutRancher
 
 import (
-	"encoding/json"
-	"errors"
 	"github.com/fsouza/go-dockerclient"
-	"github.com/gliderlabs/logspout/router"
 	"github.com/rancherio/go-rancher/v2"
 	"log"
-	"net"
 	"os"
-	"strings"
 )
 
 // Setting package global Rancher API setting
@@ -21,17 +16,7 @@ var rancher *client.RancherClient
 var cCache map[string]*RancherInfo
 
 func init() {
-	router.AdapterFactories.Register(NewLogstashAdapter, "logstash")
 	rancher = initRancherClient()
-	cCache = make(map[string]*RancherInfo)
-}
-
-// LogstashAdapter is an adapter that streams UDP JSON to Logstash.
-type LogstashAdapter struct {
-	conn           net.Conn
-	route          *router.Route
-	containerTags  map[string][]string
-	logstashFields map[string]map[string]string
 }
 
 func initRancherClient() *client.RancherClient {
@@ -49,54 +34,6 @@ func initRancherClient() *client.RancherClient {
 	}
 
 	return r
-}
-
-// NewLogstashAdapter creates a LogstashAdapter with UDP as the default transport.
-func NewLogstashAdapter(route *router.Route) (router.LogAdapter, error) {
-	transport, found := router.AdapterTransports.Lookup(route.AdapterTransport("udp"))
-	if !found {
-		return nil, errors.New("unable to find adapter: " + route.Adapter)
-	}
-
-	conn, err := transport.Dial(route.Address, route.Options)
-	if err != nil {
-		return nil, err
-	}
-
-	return &LogstashAdapter{
-		route:          route,
-		conn:           conn,
-		containerTags:  make(map[string][]string),
-		logstashFields: make(map[string]map[string]string),
-	}, nil
-}
-
-// Parse the logstash fields env variables
-func GetLogstashFields(c *docker.Container, a *LogstashAdapter) map[string]string {
-	if fields, ok := a.logstashFields[c.ID]; ok {
-		return fields
-	}
-
-	fieldsStr := os.Getenv("LOGSTASH_FIELDS")
-	fields := map[string]string{}
-
-	for _, e := range c.Config.Env {
-		if strings.HasPrefix(e, "LOGSTASH_FIELDS=") {
-			fieldsStr = strings.TrimPrefix(e, "LOGSTASH_FIELDS=")
-		}
-	}
-
-	if len(fieldsStr) > 0 {
-		for _, f := range strings.Split(fieldsStr, ",") {
-			sp := strings.Split(f, "=")
-			k, v := sp[0], sp[1]
-			fields[k] = v
-		}
-	}
-
-	a.logstashFields[c.ID] = fields
-
-	return fields
 }
 
 // Uses the passed docker id to find the rancher Id
@@ -195,61 +132,6 @@ func GetRancherInfo(c *docker.Container) *RancherInfo {
 	}
 
 	return GetFromCache(c.ID)
-}
-
-// Stream implements the router.LogAdapter interface.
-func (a *LogstashAdapter) Stream(logstream chan *router.Message) {
-
-	for m := range logstream {
-
-		dockerInfo := DockerInfo{
-			Name:     m.Container.Name,
-			ID:       m.Container.ID,
-			Image:    m.Container.Config.Image,
-			Hostname: m.Container.Config.Hostname,
-		}
-
-		fields := GetLogstashFields(m.Container, a)
-
-		rancherInfo := GetRancherInfo(m.Container)
-
-		if rancherInfo == nil {
-			continue
-		}
-
-		var js []byte
-		var data map[string]interface{}
-		var err error
-
-		// Try to parse JSON-encoded m.Data. If it wasn't JSON, create an empty object
-		// and use the original data as the message.
-		if err = json.Unmarshal([]byte(m.Data), &data); err != nil {
-			data = make(map[string]interface{})
-			data["message"] = m.Data
-		}
-
-		for k, v := range fields {
-			data[k] = v
-		}
-
-		data["docker"] = dockerInfo
-		data["rancher"] = rancherInfo
-
-		// Return the JSON encoding
-		if js, err = json.Marshal(data); err != nil {
-			// Log error message and continue parsing next line, if marshalling fails
-			log.Println("logstash: could not marshal JSON:", err)
-			continue
-		}
-
-		// To work with tls and tcp transports via json_lines codec
-		js = append(js, byte('\n'))
-
-		if _, err := a.conn.Write(js); err != nil {
-			// There is no retry option implemented yet
-			log.Fatal("logstash: could not write:", err)
-		}
-	}
 }
 
 // Container Docker info for event data
